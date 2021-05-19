@@ -1,20 +1,31 @@
-const express = require('express')
-const products = require('./data/products')
+import express from "express";
+import dotenv from "dotenv";
 
-const app = express()
+import connectDB from "./config/db.js";
 
+import productRoutes from "./routes/productRoutes.js";
+import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
-app.get('/', (req, res)=> {
-    res.send('API is running...')
-})
+dotenv.config();
 
-app.get('/api/products', (req, res) => {
-    res.json(products)
-})
+connectDB();
 
-app.get('/api/products/:id', (req, res) => {
-    const product = products.find(x => x._id === req.params.id)
-    res.json(product)
-})
+const app = express();
 
-app.listen(5000, console.log('Server Running on port 5000'))
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
+app.use("/api/products", productRoutes);
+
+//Error Handling MiddleWare
+app.use(notFound)
+
+app.use(errorHandler)
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(
+  PORT,
+  console.log(`Server Running on ${process.env.NODE_ENV} mode on port ${PORT}`)
+);
